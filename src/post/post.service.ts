@@ -9,26 +9,37 @@ import { Post } from '../entities/post.entity';
 export class PostService {
   constructor(private readonly postRepository: PostRepository) {}
 
-  async create(createPostDto: CreatePostDto, userId: string): Promise<Post> {
-    return this.postRepository.save({
-      ...createPostDto,
-      userId,
+  async create(createPostDto: CreatePostDto, userId: string, filePath: string): Promise<Post> {
+    return this.postRepository.createPost({ ...createPostDto, userId, filePath });
+  }
+
+  async findAll(userId: string): Promise<Post[]> {
+    return this.postRepository.find({
+      where: {
+        userId,
+      },
+      order: {
+        created: 'desc',
+      },
+      relations: {
+        tags: true,
+      },
     });
   }
 
-  findAll() {
-    return `This action returns all post`;
+  async findOne(id: string): Promise<Post> {
+    return this.postRepository.findOne({
+      where: { id },
+      relations: { tags: true },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} post`;
+  async update(id: string, updatePostDto: UpdatePostDto): Promise<Post> {
+    await this.postRepository.update(id, updatePostDto);
+    return this.findOne(id);
   }
 
-  update(id: number, updatePostDto: UpdatePostDto) {
-    return `This action updates a #${id} post`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} post`;
+  async remove(id: string): Promise<void> {
+    await this.postRepository.removePost(id);
   }
 }
