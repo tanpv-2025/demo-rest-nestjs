@@ -9,6 +9,11 @@ import {
   UseGuards,
   UploadedFile,
   UseInterceptors,
+  ParseUUIDPipe,
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  FileTypeValidator,
+  HttpStatus,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 
@@ -24,13 +29,22 @@ export class PostController {
   constructor(private readonly postService: PostService) {}
 
   @Post()
-  @UseInterceptors(FileInterceptor('file', { dest: './uploads' }))
+  @UseInterceptors(FileInterceptor('file'))
   create(
     @CurrentUser() currentUser,
     @Body() createPostDto: CreatePostDto,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 200000 }),
+          new FileTypeValidator({ fileType: 'image/jpeg' }),
+        ],
+        errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+      }),
+    )
+    file: Express.Multer.File,
   ) {
-    return this.postService.create(createPostDto, currentUser.id, file.path);
+    return this.postService.create(createPostDto, currentUser.id, file);
   }
 
   @Get()
@@ -39,17 +53,20 @@ export class PostController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.postService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updatePostDto: UpdatePostDto,
+  ) {
     return this.postService.update(id, updatePostDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.postService.remove(id);
   }
 }

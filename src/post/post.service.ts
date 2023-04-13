@@ -4,13 +4,23 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PostRepository } from './post.repository';
 import { Post } from '../entities/post.entity';
+import { writeFileToTempDir } from '../shared/ultils/file.util';
 
 @Injectable()
 export class PostService {
   constructor(private readonly postRepository: PostRepository) {}
 
-  async create(createPostDto: CreatePostDto, userId: string, filePath: string): Promise<Post> {
-    return this.postRepository.createPost({ ...createPostDto, userId, filePath });
+  async create(
+    createPostDto: CreatePostDto,
+    userId: string,
+    file: Express.Multer.File,
+  ): Promise<Post> {
+    const filePath: string = await writeFileToTempDir(file);
+    return this.postRepository.createPost({
+      ...createPostDto,
+      userId,
+      filePath,
+    });
   }
 
   async findAll(userId: string): Promise<Post[]> {
