@@ -1,4 +1,3 @@
-// import { PostModule } from './../post/post.module';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 

@@ -2,7 +2,7 @@ import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 
 import { Base } from './base.entity';
 import { Post } from './post.entity';
-import { EntityConstant } from './../shared/constants/entity.constant';
+import { EntityConstant } from '../shared/constants/entity.constant';
 
 @Entity('tags')
 @Index(['name'], { unique: true, where: 'deleted IS NULL' })

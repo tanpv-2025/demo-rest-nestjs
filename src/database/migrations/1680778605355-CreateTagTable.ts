@@ -9,7 +9,8 @@ export class CreateTagTable1680778605355 implements MigrationInterface {
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
         "updated" TIMESTAMP(3) NOT NULL DEFAULT now(),
         "created" TIMESTAMP(3) NOT NULL DEFAULT now(),
-        "deleted" TIMESTAMP(3), "post_id" uuid NOT NULL,
+        "deleted" TIMESTAMP(3),
+        "post_id" uuid NOT NULL,
         "name" character varying(255) NOT NULL,
         CONSTRAINT "UQ_d90243459a697eadb8ad56e9092" UNIQUE ("name"),
         CONSTRAINT "PK_e7dc17249a1148a1970748eda99" PRIMARY KEY ("id")

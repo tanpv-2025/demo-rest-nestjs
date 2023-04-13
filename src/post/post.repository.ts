@@ -4,6 +4,10 @@ import { Repository, DataSource, EntityNotFoundError } from 'typeorm';
 import { CreatePostDto } from './dto/create-post.dto';
 import { Post } from '../entities/post.entity';
 import { Tag } from '../entities/tag.entity';
+import {
+  writeFileToTempDir,
+  getFilePathFromFileName,
+} from '../shared/ultils/file.util';
 
 @Injectable()
 export class PostRepository extends Repository<Post> {
@@ -11,12 +15,16 @@ export class PostRepository extends Repository<Post> {
     super(Post, dataSource.manager);
   }
 
-  async createPost(createPostDto: CreatePostDto): Promise<Post> {
+  async createPost(
+    createPostDto: CreatePostDto,
+    file: Express.Multer.File,
+  ): Promise<Post> {
     return this.dataSource.transaction(async (transactionalEntityManager) => {
-      const post: Post = await transactionalEntityManager.save(
-        Post,
-        createPostDto,
-      );
+      const filePath: string = getFilePathFromFileName(file.originalname);
+      const post: Post = await transactionalEntityManager.save(Post, {
+        ...createPostDto,
+        filePath,
+      });
 
       if (createPostDto.tags && createPostDto.tags.length) {
         const tagData: Tag[] = createPostDto.tags.map((tag: Tag) => ({
@@ -25,6 +33,8 @@ export class PostRepository extends Repository<Post> {
         }));
         await transactionalEntityManager.save(Tag, tagData);
       }
+      await writeFileToTempDir(filePath, file);
+
       return post;
     });
   }

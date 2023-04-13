@@ -2,14 +2,19 @@ import os from 'os';
 import path from 'path';
 import * as fs from 'fs';
 
-export function writeFileToTempDir(file: Express.Multer.File): Promise<string> {
+export function getFilePathFromFileName(fileName: string): string {
+  return path.join(os.tmpdir(), `${new Date().valueOf()}-${fileName}`);
+}
+
+export function writeFileToTempDir(
+  filePath: string,
+  file: Express.Multer.File,
+): Promise<string> {
   return new Promise((resolve, reject) => {
-    const fileName = `${new Date().valueOf()}-${file.originalname}`;
-    const uploadPath: string = path.join(os.tmpdir(), fileName);
-    const writeStream: fs.WriteStream = fs.createWriteStream(uploadPath);
+    const writeStream: fs.WriteStream = fs.createWriteStream(filePath);
     writeStream.write(file.buffer);
     writeStream.end();
-    writeStream.on('finish', () => resolve(uploadPath));
+    writeStream.on('finish', () => resolve(filePath));
     writeStream.on('error', (err: Error) => reject(err));
   });
 }
