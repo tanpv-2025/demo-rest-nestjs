@@ -1,5 +1,5 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Repository, DataSource } from 'typeorm';
+import { Injectable } from '@nestjs/common';
+import { Repository, DataSource, EntityNotFoundError } from 'typeorm';
 
 import { CreatePostDto } from './dto/create-post.dto';
 import { Post } from '../entities/post.entity';
@@ -44,7 +44,7 @@ export class PostRepository extends Repository<Post> {
         await transactionalEntityManager.softDelete(Post, id);
       });
     } else {
-      throw new NotFoundException('Post not found');
+      throw new EntityNotFoundError(Post, id);
     }
   }
 }

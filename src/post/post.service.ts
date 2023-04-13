@@ -4,7 +4,10 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PostRepository } from './post.repository';
 import { Post } from '../entities/post.entity';
-import { writeFileToTempDir } from '../shared/ultils/file.util';
+import {
+  removeFileFromPath,
+  writeFileToTempDir,
+} from '../shared/ultils/file.util';
 
 @Injectable()
 export class PostService {
@@ -14,13 +17,19 @@ export class PostService {
     createPostDto: CreatePostDto,
     userId: string,
     file: Express.Multer.File,
-  ): Promise<Post> {
+  ): Promise<Post | null> {
     const filePath: string = await writeFileToTempDir(file);
-    return this.postRepository.createPost({
-      ...createPostDto,
-      userId,
-      filePath,
-    });
+
+    try {
+      return this.postRepository.createPost({
+        ...createPostDto,
+        userId,
+        filePath,
+      });
+    } catch (error) {
+      await removeFileFromPath(filePath);
+      return null;
+    }
   }
 
   async findAll(userId: string): Promise<Post[]> {
