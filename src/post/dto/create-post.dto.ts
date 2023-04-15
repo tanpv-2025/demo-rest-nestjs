@@ -1,14 +1,15 @@
 import {
+  IsArray,
   IsNotEmpty,
   IsOptional,
   MaxLength,
   ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 
 import { EntityConstant } from '../../shared/constants/entity.constant';
 import { Post } from '../../entities/post.entity';
-import { TestDto } from './test.dto';
-import { Type } from 'class-transformer';
+import { TagDto } from '../../tag/dto/create-tag.dto';
 
 export class CreatePostDto {
   static resource = Post.name;
@@ -21,10 +22,13 @@ export class CreatePostDto {
   @MaxLength(EntityConstant.longLength)
   description: string;
 
-  @IsNotEmpty()
+  @IsArray()
+  @IsOptional()
   @ValidateNested({ each: true })
-  @Type(() => TestDto)
-  test: TestDto[];
+  @Type(() => TagDto)
+  tags: TagDto[];
 
   userId: string;
+
+  filePath: string;
 }

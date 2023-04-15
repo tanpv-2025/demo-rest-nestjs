@@ -7,6 +7,7 @@ import { LoggerModule } from './logger/logger.module';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { PostModule } from './post/post.module';
+import { TagModule } from './tag/tag.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { PostModule } from './post/post.module';
     UserModule,
     AuthModule,
     PostModule,
+    TagModule,
   ],
 })
 export class AppModule implements NestModule {
