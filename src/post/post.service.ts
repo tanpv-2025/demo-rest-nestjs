@@ -4,23 +4,33 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PostRepository } from './post.repository';
 import { Post } from '../entities/post.entity';
+import { User } from '../entities/user.entity';
+import { QueueService } from '../queue/queue.service';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class PostService {
-  constructor(private readonly postRepository: PostRepository) {}
+  constructor(
+    private readonly postRepository: PostRepository,
+    private readonly queueService: QueueService,
+    private readonly userService: UserService,
+  ) {}
 
   async create(
     createPostDto: CreatePostDto,
     userId: string,
     file: Express.Multer.File,
   ): Promise<Post> {
-    return this.postRepository.createPost(
+    const post: Post = await this.postRepository.createPost(
       {
         ...createPostDto,
         userId,
       },
       file,
     );
+    const users: User[] = await this.userService.findAll();
+    await this.queueService.sendMailCreatePost(users, post);
+    return post;
   }
 
   async findAll(userId: string): Promise<Post[]> {
