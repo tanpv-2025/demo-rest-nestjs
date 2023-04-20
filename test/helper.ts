@@ -27,7 +27,6 @@ import { User } from '../src/entities/user.entity';
 import { hash } from '../src/shared/ultils/bcypt.util';
 
 export const initApp = async (): Promise<INestApplication> => {
-  await mockFs();
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],
   }).compile();
@@ -73,6 +72,27 @@ export const getJWTResponse = async (
   if (header['content-type'] === 'text/csv; charset=utf-8') {
     return [status, text, header];
   }
+
+  return [status, isJsonString(text) ? JSON.parse(text) : text, header];
+};
+
+export const getJWTResponseWithFile = async (
+  app: INestApplication,
+  method: string,
+  route: string,
+  variables: any = {},
+  file: { buffer: Buffer, options: { filename: string, contentType: string } },
+  token = '',
+) => {
+  route = route.startsWith('/') ? route : `/${route}`;
+  const { status, text, header } = await request(app.getHttpServer())
+    [method](route)
+    .set('Authorization', `Bearer ${token}`)
+    .set('x-authorization', token)
+    .set('cookie', `accessToken=${token}`)
+    .set('content-type', 'multipart/form-data')
+    .attach('file', file.buffer, file.options)
+    .field(variables);
 
   return [status, isJsonString(text) ? JSON.parse(text) : text, header];
 };
