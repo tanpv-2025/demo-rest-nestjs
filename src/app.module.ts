@@ -11,6 +11,7 @@ import { PostModule } from './post/post.module';
 import { TagModule } from './tag/tag.module';
 import { MailModule } from './mail/mail.module';
 import queueConfig from './queue/queue.config';
+import { MediaModule } from './media/media.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import queueConfig from './queue/queue.config';
     TagModule,
     MailModule,
     BullModule.forRoot(queueConfig),
+    MediaModule,
   ],
 })
 export class AppModule implements NestModule {
